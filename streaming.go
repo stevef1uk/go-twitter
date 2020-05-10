@@ -5,11 +5,8 @@ import (
 	"io/ioutil"
 	"strings"
 	"time"
-
-	//"encoding/json"
 	"flag"
 	"fmt"
-	//handler "github.com/openfaas-incubator/go-function-sdk"
 	"log"
 	"net/http"
 	"os"
@@ -28,9 +25,10 @@ func main() {
 	consumerSecret := flags.String("consumer-secret", "", "Twitter Consumer Secret")
 	accessToken := flags.String("access-token", "", "Twitter Access Token")
 	accessSecret := flags.String("access-secret", "", "Twitter Access Secret")
+	index_ptr := flags.Int("index", 99999, "ID to start insert from")
 	flags.Parse(os.Args[1:])
 	flagutil.SetFlagsFromEnv(flags, "TWITTER")
-	index := 56000
+	index := *index_ptr
 
 	if *consumerKey == "" || *consumerSecret == "" || *accessToken == "" || *accessSecret == "" {
 		log.Fatal("Consumer key/secret and Access token/secret required")
@@ -53,7 +51,7 @@ func main() {
 		url := "https://gw.sjfisher.com/async-function/stevef1uk-go1"
 		//test1 := cleanTweet( `"This" 'is a test'`)
 		//_ = test1
-	    toInsert := `"id":` + strconv.Itoa(index) + "," + ` "message": ` + `"` + cleanTweet(tweet.Text) + `"`
+		toInsert := `"id":` + strconv.Itoa(index) + "," + ` "message": ` + `"` + cleanTweet(tweet.Text) + `"`
 		data := []byte("{" + toInsert + "}")
 
 		req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
@@ -82,7 +80,7 @@ func main() {
 	// FILTER
 	filterParams := &twitter.StreamFilterParams{
 		Track:         []string{"virus"},
-		Language: []string{"en"},
+		Language:      []string{"en"},
 		StallWarnings: twitter.Bool(true),
 	}
 	stream, err := client.Streams.Filter(filterParams)
@@ -122,7 +120,7 @@ func main() {
 	stream.Stop()
 }
 
-func handlePOST(req * http.Request, index int) (string, error) {
+func handlePOST(req *http.Request, index int) (string, error) {
 	ret := ""
 
 	log.Println("In HandlePOST, Host = " + req.Host + "index = " + strconv.Itoa(index))
@@ -152,11 +150,11 @@ func handlePOST(req * http.Request, index int) (string, error) {
 	return ret, err
 }
 
-func cleanTweet ( data string ) ( string ) {
+func cleanTweet(data string) string {
 
-	res1 := strings.ReplaceAll( data, `"`, "")
-	res2 := strings.ReplaceAll( res1, `'`, "")
-	res1 = strings.ReplaceAll( res2, "`", "")
+	res1 := strings.ReplaceAll(data, `"`, "")
+	res2 := strings.ReplaceAll(res1, `'`, "")
+	res1 = strings.ReplaceAll(res2, "`", "")
 
 	return res1
 }
