@@ -26,12 +26,18 @@ func main() {
 	accessToken := flags.String("access-token", "", "Twitter Access Token")
 	accessSecret := flags.String("access-secret", "", "Twitter Access Secret")
 	index_ptr := flags.Int("index", 99999, "ID to start insert from")
+	apiKey := flags.String("openfaas-api-key", "", "OpenFaas Function API Key")
 	flags.Parse(os.Args[1:])
 	flagutil.SetFlagsFromEnv(flags, "TWITTER")
 	index := *index_ptr
 
 	if *consumerKey == "" || *consumerSecret == "" || *accessToken == "" || *accessSecret == "" {
 		log.Fatal("Consumer key/secret and Access token/secret required")
+	}
+	if *apiKey == ""  {
+		log.Fatal("OpenFaas Function API Key required")
+	} else {
+		fmt.Println("Api Key = ", *apiKey)
 	}
 
 	config := oauth1.NewConfig(*consumerKey, *consumerSecret)
@@ -48,7 +54,8 @@ func main() {
 		index = index + 1
 		fmt.Println(tweet.Text)
 
-		url := "https://gw.sjfisher.com/async-function/stevef1uk-go1"
+		//url := "https://gw.sjfisher.com/async-function/stevef1uk-go1"
+		url := "http://gw.sjfisher.com/async-function/go1"
 		//test1 := cleanTweet( `"This" 'is a test'`)
 		//_ = test1
 		toInsert := `"id":` + strconv.Itoa(index) + "," + ` "message": ` + `"` + cleanTweet(tweet.Text) + `"`
@@ -61,7 +68,7 @@ func main() {
 
 		// Set headers
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("X-Api-Key", "I'mSteveLetMeIn")
+		req.Header.Set("X-Api-Key", *apiKey)
 
 		_, err = handlePOST(req, index)
 		if err != nil {
