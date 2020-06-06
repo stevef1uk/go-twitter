@@ -36,9 +36,7 @@ func main() {
 	}
 	if *apiKey == ""  {
 		log.Fatal("OpenFaas Function API Key required")
-	} else {
-		fmt.Println("Api Key = ", *apiKey)
-	}
+	} 
 
 	config := oauth1.NewConfig(*consumerKey, *consumerSecret)
 	token := oauth1.NewToken(*accessToken, *accessSecret)
